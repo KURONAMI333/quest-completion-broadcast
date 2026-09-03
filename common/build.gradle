@@ -1,0 +1,51 @@
+plugins {
+    id 'multiloader-common'
+    id 'net.neoforged.moddev'
+}
+
+neoForge {
+    neoFormVersion = neo_form_version
+    // Automatically enable AccessTransformers if the file exists
+    def at = file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformers.from(at.absolutePath)
+    }
+    parchment {
+        minecraftVersion = parchment_minecraft
+        mappingsVersion = parchment_version
+    }
+}
+
+dependencies {
+    compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
+    // fabric and neoforge both bundle mixinextras, so it is safe to use it in common
+    compileOnly group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
+    annotationProcessor group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
+
+    // FTB Quests API (compile only; the host mod is provided by the player's installation).
+    // NOTE: the plain (common/fabric) artifacts are built against Fabric intermediary names
+    // (class_3222 etc.), which do not match this project's NeoForm (mojang mappings). The
+    // -neoforge artifacts are mojmap-based, so common + neoforge compile against those.
+    // NOTE: loader modules recompile common sources, so these must be declared here too
+    // (NEW_MOD_GUIDE.md 罠節: common だけに宣言すると :neoforge:compileJava が落ちる)
+    compileOnly "dev.ftb.mods:ftb-quests-neoforge:${ftb_quests_version}"
+    compileOnly "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version}"
+    compileOnly "dev.architectury:architectury-neoforge:${architectury_version}"
+}
+
+configurations {
+    commonJava {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+    commonResources {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+}
+
+artifacts {
+    commonJava sourceSets.main.java.sourceDirectories.singleFile
+    commonResources sourceSets.main.resources.sourceDirectories.singleFile
+}
+

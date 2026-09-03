@@ -1,0 +1,98 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.neoforged.moddev'
+}
+
+// Dev-only host mod jars (never published; NEW_MOD_GUIDE.md 罠節の localRuntime パターン)
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
+}
+
+sourceSets {
+    // 開発専用の GameTest 足場。jar タスクの入力は main だけなので、この source set は
+    // 出荷 jar に入らない (PLAYBOOK_GAMETEST.md Phase 1)
+    gametest {
+        // NOTE: runtimeClasspath には main.output だけでなく main.compileClasspath も要る。
+        // host addon なので FTB 一式 (compileOnly/localRuntime) まで run クラスパスに載せる必要がある
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+    }
+}
+
+dependencies {
+    // FTB Quests API (mojmap ベースの -neoforge artifacts。common ソース再コンパイルのため要)
+    compileOnly "dev.ftb.mods:ftb-quests-neoforge:${ftb_quests_version}"
+    compileOnly "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version}"
+    compileOnly "dev.architectury:architectury-neoforge:${architectury_version}"
+
+    // runtime 確認用の本体一式 (gametest サーバーで FTB スタックごと起動させる)
+    localRuntime "dev.ftb.mods:ftb-quests-neoforge:${ftb_quests_version}"
+    localRuntime "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version}"
+    localRuntime "dev.ftb.mods:ftb-teams-neoforge:${ftb_teams_version}"
+    localRuntime "dev.architectury:architectury-neoforge:${architectury_version}"
+
+    // JUnit (純粋ロジックの単体テスト。MC 非依存クラスのみ対象)
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation(project(':common')) {
+        capabilities {
+            requireCapability "$group:$mod_id"
+        }
+    }
+}
+
+neoForge {
+    version = neoforge_version
+    // Automatically enable neoforge AccessTransformers if the file exists
+    def at = project(':common').file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformers.from(at.absolutePath)
+    }
+    parchment {
+        minecraftVersion = parchment_minecraft
+        mappingsVersion = parchment_version
+    }
+    addModdingDependenciesTo sourceSets.gametest
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+        "${mod_id}_gametest" {
+            sourceSet sourceSets.gametest
+        }
+    }
+    runs {
+        configureEach {
+            systemProperty('neoforge.enabledGameTestNamespaces', mod_id)
+            ideName = "NeoForge ${it.name.capitalize()} (${project.path})" // Unify the run config names with fabric
+            // NOTE: loadedMods は明示しない。本 MOD は host addon であり、localRuntime で
+            // classpath に載せた FTB 一式まで含めた「classpath 上の全 mod」をロードさせる必要がある
+            // （明示すると外部 jar が除外され ftbquests 未インストールで起動失敗する＝F9 実測）
+        }
+        client {
+            client()
+        }
+        data {
+            data()
+
+            // DataGen can be run by - "./gradlew :neoforge:runData" in Terminal.
+            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+
+        }
+        server {
+            server()
+        }
+        gameTestServer {
+            type = 'gameTestServer'
+            sourceSet = sourceSets.gametest
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+test {
+    useJUnitPlatform()
+}

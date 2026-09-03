@@ -1,0 +1,48 @@
+plugins {
+    id 'multiloader-loader'
+    id 'fabric-loom'
+}
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.layered {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${parchment_minecraft}:${parchment_version}@zip")
+    }
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+
+    // FTB Quests API.
+    // NOTE: the -fabric artifacts are built with a much newer Loom, and our pinned Loom 1.8
+    // refuses to remap them ("Mod was built with a newer version of Loom"). The plain/common
+    // artifacts are also unusable here because they reference intermediary names. The
+    // -neoforge artifacts expose the identical dev.ftb.mods.* API in mojmap names, which
+    // matches our Mojang-mappings compile; MC types referenced from OUR classes are remapped
+    // by Loom when producing the shipped jar.
+    compileOnly "dev.ftb.mods:ftb-quests-neoforge:${ftb_quests_version}"
+    compileOnly "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version}"
+    modCompileOnly "dev.architectury:architectury-fabric:${architectury_version}"
+}
+
+loom {
+    def aw = project(':common').file("src/main/resources/${mod_id}.accesswidener")
+    if (aw.exists()) {
+        accessWidenerPath.set(aw)
+    }
+    mixin {
+        defaultRefmapName.set("${mod_id}.refmap.json")
+    }
+    runs {
+        client {
+            client()
+            setConfigName('Fabric Client')
+            ideConfigGenerated(true)
+            runDir('runs/client')
+        }
+        server {
+            server()
+            setConfigName('Fabric Server')
+            ideConfigGenerated(true)
+            runDir('runs/server')
+        }
+    }
+}

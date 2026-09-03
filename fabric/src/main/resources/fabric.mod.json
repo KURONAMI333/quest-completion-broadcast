@@ -1,0 +1,30 @@
+{
+    "schemaVersion": 1,
+    "id": "${mod_id}",
+    "version": "${version}",
+    "name": "${mod_name}",
+    "description": "${description}",
+    "authors": [
+        "${mod_author}"
+    ],
+    "contact": {
+        "homepage": "https://github.com/KURONAMI333/quest-completion-broadcast",
+        "issues": "https://github.com/KURONAMI333/quest-completion-broadcast/issues",
+        "sources": "https://github.com/KURONAMI333/quest-completion-broadcast"
+    },
+    "license": "${license}",
+    "icon": "assets/questbroadcast/icon.png",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            "com.kuronami.questbroadcast.Questbroadcast"
+        ]
+    },
+    "depends": {
+        "fabricloader": ">=${fabric_loader_version}",
+        "fabric-api": "*",
+        "minecraft": "${minecraft_version}",
+        "java": ">=${java_version}",
+        "ftbquests": ">=${ftb_quests_version}"
+    }
+}
