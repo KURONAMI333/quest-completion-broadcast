@@ -29,4 +29,6 @@ FTB Quests is published on CurseForge only, so a Modrinth-only setup cannot reso
 - It announces quest completions. Chapter completions, quest starts and reward claims are not announced.
 - Team-based: the message names the player who finished it for the team.
 
-All Rights Reserved. Modpack inclusion is allowed without permission or credit. Source and issues: https://github.com/KURONAMI333/quest-completion-broadcast
+Bugs and questions: comment on the CurseForge page, or DM @kuronami333 on X.
+
+All Rights Reserved. Modpack inclusion is allowed without permission or credit. Source: https://github.com/KURONAMI333/quest-completion-broadcast
