@@ -12,3 +12,11 @@ team and quest are suppressed, including the client-side event replays FTB Quest
 for GUI sync.
 
 License: All Rights Reserved.
+
+## Downloads and support
+
+Downloads: [GitHub Releases](https://github.com/KURONAMI333/quest-completion-broadcast/releases/tag/v0.1.0).
+
+For bugs and questions, DM [@kuronami333 on X](https://x.com/kuronami333).
+
+[Source](https://github.com/KURONAMI333/quest-completion-broadcast) · [License](LICENSE)
